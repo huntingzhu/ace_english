@@ -1,15 +1,15 @@
 ---
 name: add-english-sentences
-description: Append new sentences with grammar corrections to Hunting's sentence-study database at ~/Documents/Claude/Projects/HuntingEnglish/sentences.csv (sandbox path $HOME/mnt/HuntingEnglish/sentences.csv). Each entry stores the original sentence, a grammar-checked corrected version, an explanation of the mistakes, and a mistake_type tag (tense, agreement, article, word_choice, syntax, preposition, etc.). Use this skill whenever Hunting wants to save, log, remember, or memorize a sentence — including phrasings like "save this sentence", "remember this grammar mistake", "add this to my sentence flashcards", "fix this and remember it", "记一下这句话", or when Hunting pastes sentences to grammar-check and store. Also trigger when Hunting references sentences.csv or sentence_flashcards.html in the context of saving sentence-level material. Do NOT trigger for single-word/phrase additions (use add-english-words instead) or for pure grammar Q&A that doesn't involve persisting to the database.
+description: Append new sentences with grammar corrections to Hunting's sentence-study database at ~/Documents/Claude/Projects/HuntingEnglish/databases/sentences.csv (sandbox path $HOME/mnt/HuntingEnglish/databases/sentences.csv). Each entry stores the original sentence, a grammar-checked corrected version, an explanation of the mistakes, and a mistake_type tag (tense, agreement, article, word_choice, syntax, preposition, etc.). Use this skill whenever Hunting wants to save, log, remember, or memorize a sentence — including phrasings like "save this sentence", "remember this grammar mistake", "add this to my sentence flashcards", "fix this and remember it", "记一下这句话", or when Hunting pastes sentences to grammar-check and store. Also trigger when Hunting references sentences.csv or sentence_flashcards.html in the context of saving sentence-level material. Do NOT trigger for single-word/phrase additions (use add-english-words instead) or for pure grammar Q&A that doesn't involve persisting to the database.
 ---
 
 # Add English Sentences to Hunting's Grammar-Memorization Database
 
-This skill appends grammar-checked sentence entries to `sentences.csv` in Hunting's `HuntingEnglish` project — the CSV database that powers the sentence flashcard tool (`sentence_flashcards.html`).
+This skill appends grammar-checked sentence entries to `databases/sentences.csv` in Hunting's `HuntingEnglish` project — the CSV database that powers the sentence flashcard tool (`apps/sentence_flashcards.html`).
 
-**Canonical host path** (on Hunting's Mac): `~/Documents/Claude/Projects/HuntingEnglish/sentences.csv`
+**Canonical host path** (on Hunting's Mac): `~/Documents/Claude/Projects/HuntingEnglish/databases/sentences.csv`
 
-**Sandbox path** (what the skill actually reads/writes at runtime): Cowork mounts that project folder into the session sandbox. It's reachable from inside the sandbox at `$HOME/mnt/HuntingEnglish/sentences.csv`, where `$HOME` is the current session's mount root (e.g. `/sessions/<session-id>/`). The path is resolved at runtime so the skill keeps working across sessions as long as the `HuntingEnglish` project is selected. You can also override by setting the `SENTENCES_PATH` environment variable.
+**Sandbox path** (what the skill actually reads/writes at runtime): Cowork mounts that project folder into the session sandbox. It's reachable from inside the sandbox at `$HOME/mnt/HuntingEnglish/databases/sentences.csv`, where `$HOME` is the current session's mount root (e.g. `/sessions/<session-id>/`). The path is resolved at runtime so the skill keeps working across sessions as long as the `HuntingEnglish` project is selected. You can also override by setting the `SENTENCES_PATH` environment variable.
 
 Each entry stores the user's original sentence (warts and all), the corrected version, a clear written explanation of what was wrong, and a mistake-type tag for filtering.
 
@@ -60,7 +60,7 @@ Extract every sentence Hunting wants to save. If the input is a list, parse it i
 
 ### 2. Check for duplicates
 
-Read `sentences.csv` first. It lives on Hunting's Mac at `~/Documents/Claude/Projects/HuntingEnglish/sentences.csv`, which Cowork mounts into the sandbox at `$HOME/mnt/HuntingEnglish/sentences.csv` — use that sandbox path for I/O. `$HOME` changes per session, so don't hardcode a session-specific prefix. If a candidate's `original_sentence` (case-insensitive, whitespace-normalized) is already there, surface it and skip by default. Never overwrite — Hunting's flashcard progress would be clobbered.
+Read `databases/sentences.csv` first. It lives on Hunting's Mac at `~/Documents/Claude/Projects/HuntingEnglish/databases/sentences.csv`, which Cowork mounts into the sandbox at `$HOME/mnt/HuntingEnglish/databases/sentences.csv` — use that sandbox path for I/O. `$HOME` changes per session, so don't hardcode a session-specific prefix. If a candidate's `original_sentence` (case-insensitive, whitespace-normalized) is already there, surface it and skip by default. Never overwrite — Hunting's flashcard progress would be clobbered.
 
 ### 3. Grammar-check and explain each entry
 
@@ -94,7 +94,7 @@ Use `scripts/append_sentences.py`. The script:
 - Skips duplicates (case-insensitive + whitespace-normalized match on `original_sentence`).
 - Rewrites the file atomically with `csv.QUOTE_ALL`, so embedded commas, Chinese punctuation, and apostrophes are all safely escaped.
 
-Never write to `sentences.csv` with the Write or Edit tool directly — that's how quoting gets inconsistent. Always go through this script (or, as a fallback, a one-off Python snippet using `csv.writer(..., quoting=csv.QUOTE_ALL)`).
+Never write to `databases/sentences.csv` with the Write or Edit tool directly — that's how quoting gets inconsistent. Always go through this script (or, as a fallback, a one-off Python snippet using `csv.writer(..., quoting=csv.QUOTE_ALL)`).
 
 Invocation:
 
@@ -117,9 +117,9 @@ The skill folder path is visible in the "Base directory for this skill" line whe
 
 Tell Hunting how many were saved and skipped. Include a link to the sentence flashcard tool. Construct the link using the current session's `$HOME`:
 
-`[Open sentence flashcards](computer://$HOME/mnt/HuntingEnglish/sentence_flashcards.html)`
+`[Open sentence flashcards](computer://$HOME/mnt/HuntingEnglish/apps/sentence_flashcards.html)`
 
-(expand `$HOME` to the actual session path when generating the link — e.g. `computer:///sessions/<session-id>/mnt/HuntingEnglish/sentence_flashcards.html`).
+(expand `$HOME` to the actual session path when generating the link — e.g. `computer:///sessions/<session-id>/mnt/HuntingEnglish/apps/sentence_flashcards.html`).
 
 Keep the report compact — a count and a short list, not a paragraph per entry.
 

@@ -351,7 +351,7 @@
   </div>
 
 <script>
-// ---------- Embedded fallback CSV (used if vocab.csv can't be fetched) ----------
+// ---------- Embedded fallback CSV (used if ../databases/vocab.csv can't be fetched) ----------
 const EMBEDDED_CSV = `"date_added","word","pronunciation","translation","example","category","status"
 "2026-04-16","prod","/prɑːd/","生产环境（production 的口语缩写）","Since this is prod, we'll deploy it tomorrow morning.","word","new"
 "2026-04-14","Hermès","/erˈmɛz/","爱马仕","Hermès is a French luxury brand.","word","new"
@@ -443,7 +443,7 @@ function keyFor(card) { return card.date_added + '||' + card.word; }
 // ---------- Loading ----------
 async function loadCSV() {
   try {
-    const res = await fetch('vocab.csv', { cache: 'no-store' });
+    const res = await fetch('../databases/vocab.csv', { cache: 'no-store' });
     if (res.ok) {
       const text = await res.text();
       if (text && text.includes(',')) return parseCSV(text);

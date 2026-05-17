@@ -49,13 +49,13 @@ from pathlib import Path
 def _resolve_default_sentences_path() -> Path:
     home = os.environ.get("HOME", "")
     if home:
-        candidate = Path(home) / "mnt" / "HuntingEnglish" / "sentences.csv"
+        candidate = Path(home) / "mnt" / "HuntingEnglish" / "databases" / "sentences.csv"
         if candidate.exists() or candidate.parent.exists():
             return candidate
-    matches = sorted(Path("/sessions").glob("*/mnt/HuntingEnglish/sentences.csv"))
+    matches = sorted(Path("/sessions").glob("*/mnt/HuntingEnglish/databases/sentences.csv"))
     if matches:
         return matches[-1]
-    return Path(home or "/sessions/current") / "mnt" / "HuntingEnglish" / "sentences.csv"
+    return Path(home or "/sessions/current") / "mnt" / "HuntingEnglish" / "databases" / "sentences.csv"
 
 
 DEFAULT_SENTENCES_PATH = _resolve_default_sentences_path()
