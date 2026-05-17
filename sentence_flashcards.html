@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hunting's Sentence Grammar Flashcards</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --panel: #1e293b;
+    --panel-2: #334155;
+    --accent: #60a5fa;
+    --accent-2: #a78bfa;
+    --good: #34d399;
+    --warn: #fbbf24;
+    --bad: #f87171;
+    --text: #f1f5f9;
+    --muted: #94a3b8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: linear-gradient(135deg, #0f172a, #1e1b4b);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+  }
+  header {
+    width: 100%;
+    max-width: 760px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  h1 {
+    font-size: 20px;
+    margin: 0;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  h1 .accent { color: var(--accent); }
+  .stats {
+    font-size: 13px;
+    color: var(--muted);
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .stats .pill {
+    background: var(--panel);
+    padding: 4px 10px;
+    border-radius: 999px;
+  }
+  .stats .pill.good { color: var(--good); }
+  .stats .pill.warn { color: var(--warn); }
+
+  .toolbar {
+    width: 100%;
+    max-width: 760px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    align-items: center;
+  }
+  .toolbar select,
+  .toolbar button,
+  .toolbar label.filebtn {
+    background: var(--panel);
+    color: var(--text);
+    border: 1px solid var(--panel-2);
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.05s;
+  }
+  .toolbar button:hover,
+  .toolbar label.filebtn:hover { background: var(--panel-2); }
+  .toolbar button:active { transform: scale(0.97); }
+  .toolbar input[type="file"] { display: none; }
+
+  /* Mode toggle */
+  .mode-toggle {
+    display: inline-flex;
+    background: var(--panel);
+    border: 1px solid var(--panel-2);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .mode-toggle button {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    padding: 8px 14px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 0;
+  }
+  .mode-toggle button.active {
+    background: var(--accent);
+    color: #0b1226;
+    font-weight: 600;
+  }
+
+  .card-wrap {
+    width: 100%;
+    max-width: 760px;
+    perspective: 1600px;
+  }
+  .card {
+    position: relative;
+    width: 100%;
+    min-height: 380px;
+    border-radius: 20px;
+    transform-style: preserve-3d;
+    transition: transform 0.55s cubic-bezier(.2,.8,.2,1);
+    cursor: pointer;
+  }
+  .card.flipped { transform: rotateY(180deg); }
+  .face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    background: linear-gradient(160deg, var(--panel) 0%, #0b1226 100%);
+    border: 1px solid var(--panel-2);
+    border-radius: 20px;
+    padding: 32px 28px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+  }
+  .face.back { transform: rotateY(180deg); }
+
+  .mistake-tag {
+    display: inline-flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-self: flex-start;
+    margin-bottom: 4px;
+  }
+  .mistake-tag .tag {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--accent);
+    background: rgba(96,165,250,0.12);
+    padding: 3px 10px;
+    border-radius: 999px;
+  }
+  .mistake-tag .tag.none { color: var(--good); background: rgba(52,211,153,0.12); }
+  .mistake-tag .tag.other { color: var(--muted); background: rgba(148,163,184,0.15); }
+
+  .mode-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 6px;
+  }
+
+  .sentence-original {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 16px 0 8px 0;
+    line-height: 1.4;
+    word-wrap: break-word;
+  }
+  .sentence-original .blank {
+    display: inline-block;
+    background: rgba(248,113,113,0.18);
+    color: var(--bad);
+    border-bottom: 2px dashed var(--bad);
+    padding: 0 8px;
+    border-radius: 4px;
+    font-weight: 700;
+    min-width: 60px;
+    text-align: center;
+  }
+  .sentence-original .err {
+    background: rgba(248,113,113,0.18);
+    color: var(--bad);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  .sentence-original .ok {
+    background: rgba(52,211,153,0.14);
+    color: var(--good);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+
+  .sentence-corrected {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--accent-2);
+    margin: 10px 0 14px 0;
+    line-height: 1.4;
+  }
+  .label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    margin-top: 14px;
+  }
+  .mistakes-box {
+    font-size: 15px;
+    line-height: 1.6;
+    margin: 6px 0 12px 0;
+    padding: 12px 14px;
+    background: rgba(255,255,255,0.04);
+    border-left: 3px solid var(--bad);
+    border-radius: 6px;
+    white-space: pre-wrap;
+  }
+  .original-box {
+    font-size: 15px;
+    line-height: 1.5;
+    margin: 6px 0 12px 0;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.03);
+    border-left: 3px solid var(--muted);
+    border-radius: 6px;
+    color: var(--muted);
+    font-style: italic;
+  }
+  .hint {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 14px;
+    font-style: italic;
+  }
+  .date-added {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: auto;
+    padding-top: 12px;
+  }
+
+  .actions {
+    margin-top: auto;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .actions .btn {
+    background: var(--panel-2);
+    color: var(--text);
+    border: none;
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.05s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .actions .btn:hover { background: #475569; }
+  .actions .btn:active { transform: scale(0.97); }
+  .actions .btn.primary { background: var(--accent); color: #0b1226; font-weight: 600; }
+  .actions .btn.primary:hover { background: #93c5fd; }
+  .actions .btn.good { background: var(--good); color: #052e1f; font-weight: 600; }
+  .actions .btn.good:hover { background: #6ee7b7; }
+  .actions .btn.warn { background: var(--warn); color: #3b2a05; font-weight: 600; }
+  .actions .btn.warn:hover { background: #fcd34d; }
+
+  footer {
+    width: 100%;
+    max-width: 760px;
+    margin-top: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  footer .nav {
+    display: flex;
+    gap: 8px;
+  }
+  footer .nav button {
+    background: var(--panel);
+    color: var(--text);
+    border: 1px solid var(--panel-2);
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  footer .nav button:hover { background: var(--panel-2); }
+  footer .counter {
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .keyboard-tip {
+    width: 100%;
+    max-width: 760px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 20px;
+    padding: 10px;
+    border-top: 1px solid var(--panel-2);
+  }
+  .keyboard-tip kbd {
+    background: var(--panel);
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--panel-2);
+    font-size: 11px;
+    font-family: "Menlo", "Consolas", monospace;
+    margin: 0 2px;
+  }
+  .status-badge {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .status-badge.new { background: rgba(148,163,184,0.2); color: var(--muted); }
+  .status-badge.learning { background: rgba(251,191,36,0.2); color: var(--warn); }
+  .status-badge.known { background: rgba(52,211,153,0.2); color: var(--good); }
+</style>
+</head>
+<body>
+  <header>
+    <h1><span class="accent">Hunting's</span> Sentence Grammar Flashcards</h1>
+    <div class="stats">
+      <span class="pill" id="stat-total">Total: 0</span>
+      <span class="pill warn" id="stat-learning">Learning: 0</span>
+      <span class="pill good" id="stat-known">Known: 0</span>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <div class="mode-toggle" title="Toggle between review and quiz mode">
+      <button id="mode-review" class="active">Review</button>
+      <button id="mode-quiz">Quiz</button>
+    </div>
+    <select id="filter-type" title="Filter by mistake type"></select>
+    <select id="filter-status" title="Filter by status">
+      <option value="all">All statuses</option>
+      <option value="new">New</option>
+      <option value="learning">Learning</option>
+      <option value="known">Known</option>
+      <option value="unknown">Not known (new + learning)</option>
+    </select>
+    <button id="shuffle-btn" title="Shuffle the deck">Shuffle</button>
+    <button id="reset-btn" title="Reset all progress">Reset progress</button>
+    <label class="filebtn" title="Load a different CSV">
+      Load CSV
+      <input type="file" id="file-input" accept=".csv">
+    </label>
+  </div>
+
+  <div class="card-wrap">
+    <div class="card" id="card" onclick="flipCard()">
+      <div class="face front">
+        <span class="status-badge new" id="status-badge-front">new</span>
+        <div class="mistake-tag" id="tag-front"></div>
+        <div class="mode-label" id="mode-label-front">Original</div>
+        <div class="sentence-original" id="sentence-front">Loading...</div>
+        <div class="actions">
+          <button class="btn primary" onclick="event.stopPropagation(); speakFront();">🔊 Play</button>
+          <button class="btn" onclick="event.stopPropagation(); flipCard();">↻ Flip</button>
+        </div>
+        <div class="hint" id="hint-front">Tap card or press <kbd>Space</kbd> to see the correction</div>
+        <div class="date-added" id="date-added-front"></div>
+      </div>
+      <div class="face back">
+        <span class="status-badge new" id="status-badge-back">new</span>
+        <div class="mistake-tag" id="tag-back"></div>
+        <div class="mode-label">Corrected</div>
+        <div class="sentence-corrected" id="sentence-corrected"></div>
+        <div class="mode-label">Original</div>
+        <div class="original-box" id="original-back"></div>
+        <div class="label">Mistakes</div>
+        <div class="mistakes-box" id="mistakes-text"></div>
+        <div class="actions">
+          <button class="btn primary" onclick="event.stopPropagation(); speakCorrected();">🔊 Play correction</button>
+          <button class="btn good" onclick="event.stopPropagation(); markStatus('known');">✓ I got it</button>
+          <button class="btn warn" onclick="event.stopPropagation(); markStatus('learning');">↻ Review again</button>
+        </div>
+        <div class="date-added" id="date-added-back"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="nav">
+      <button onclick="prev()">← Previous</button>
+      <button onclick="next()">Next →</button>
+    </div>
+    <div class="counter" id="counter">0 / 0</div>
+  </footer>
+
+  <div class="keyboard-tip">
+    <kbd>Space</kbd> flip &nbsp;·&nbsp;
+    <kbd>←</kbd> previous &nbsp;·&nbsp;
+    <kbd>→</kbd> next &nbsp;·&nbsp;
+    <kbd>P</kbd> play &nbsp;·&nbsp;
+    <kbd>K</kbd> got it &nbsp;·&nbsp;
+    <kbd>L</kbd> review again &nbsp;·&nbsp;
+    <kbd>S</kbd> shuffle &nbsp;·&nbsp;
+    <kbd>M</kbd> toggle mode
+  </div>
+
+<script>
+// ---------- Embedded fallback CSV (used if sentences.csv can't be fetched) ----------
+const EMBEDDED_CSV = `"date_added","timestamp","original_sentence","corrected_sentence","mistakes","mistake_type","status"
+"2026-05-16","2026-05-16T10:00:00","He don't like coffee.","He doesn't like coffee.","Subject-verb agreement: third-person singular ""he"" requires ""doesn't"" (not ""don't"").","agreement","new"
+"2026-05-16","2026-05-16T10:05:00","I have went to the store yesterday.","I went to the store yesterday.","Wrong tense: with a past-time marker (""yesterday"") use simple past ""went"", not present perfect ""have gone"". Also ""have went"" is never correct — past participle of ""go"" is ""gone"".","tense","new"
+"2026-05-16","2026-05-16T10:10:00","She is more taller than me.","She is taller than me.","Double comparative: ""more"" + ""-er"" is redundant. Use either ""taller"" or ""more tall"" (and ""taller"" is the natural form).","comparative","new"
+"2026-05-16","2026-05-16T10:15:00","I am agree with you.","I agree with you.","""Agree"" is a verb, not an adjective — don't pair it with ""am"". Just conjugate it directly: ""I agree.""","word_choice","new"
+"2026-05-16","2026-05-16T10:20:00","Can you explain me this problem?","Can you explain this problem to me?","""Explain"" takes the pattern ""explain something to someone"" — you can't put the indirect object directly after the verb the way you can with ""tell"" or ""give"".","syntax","new"`;
+
+// ---------- Minimal RFC-4180-ish CSV parser ----------
+function parseCSV(text) {
+  const rows = [];
+  let cur = [];
+  let field = '';
+  let inQuotes = false;
+  let i = 0;
+  while (i < text.length) {
+    const c = text[i];
+    if (inQuotes) {
+      if (c === '"') {
+        if (text[i + 1] === '"') { field += '"'; i += 2; continue; }
+        inQuotes = false; i++; continue;
+      }
+      field += c; i++; continue;
+    } else {
+      if (c === '"') { inQuotes = true; i++; continue; }
+      if (c === ',') { cur.push(field); field = ''; i++; continue; }
+      if (c === '\r') { i++; continue; }
+      if (c === '\n') { cur.push(field); rows.push(cur); cur = []; field = ''; i++; continue; }
+      field += c; i++; continue;
+    }
+  }
+  if (field.length > 0 || cur.length > 0) { cur.push(field); rows.push(cur); }
+  if (rows.length === 0) return [];
+  const headers = rows[0].map(h => h.trim());
+  return rows.slice(1).filter(r => r.some(v => v && v.length)).map(r => {
+    const obj = {};
+    headers.forEach((h, idx) => { obj[h] = (r[idx] || '').trim(); });
+    return obj;
+  });
+}
+
+// ---------- State ----------
+let allCards = [];
+let deck = [];
+let index = 0;
+let mode = 'review';  // 'review' or 'quiz'
+const STORAGE_KEY = 'hunting_sentences_progress_v1';
+const MODE_KEY = 'hunting_sentences_mode_v1';
+
+// ---------- Persistence ----------
+function loadProgress() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return {};
+    return JSON.parse(raw);
+  } catch (e) { return {}; }
+}
+function saveProgress(p) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); } catch (e) {}
+}
+function keyFor(card) {
+  return (card.timestamp || card.date_added || '') + '||' + card.original_sentence;
+}
+
+function loadMode() {
+  try {
+    const m = localStorage.getItem(MODE_KEY);
+    return (m === 'quiz') ? 'quiz' : 'review';
+  } catch (e) { return 'review'; }
+}
+function saveMode(m) {
+  try { localStorage.setItem(MODE_KEY, m); } catch (e) {}
+}
+
+// ---------- Loading ----------
+async function loadCSV() {
+  try {
+    const res = await fetch('sentences.csv', { cache: 'no-store' });
+    if (res.ok) {
+      const text = await res.text();
+      if (text && text.includes(',')) return parseCSV(text);
+    }
+  } catch (e) { /* fall through to embedded */ }
+  return parseCSV(EMBEDDED_CSV);
+}
+
+function applyProgress(cards) {
+  const p = loadProgress();
+  return cards.map(c => {
+    const k = keyFor(c);
+    if (p[k]) c.status = p[k];
+    return c;
+  });
+}
+
+// ---------- Quiz mode helpers ----------
+// Find the "different" span between original and corrected to mask out.
+// Returns { before, masked, after } or null if nothing meaningful found.
+function diffSpans(orig, corr) {
+  if (!orig || !corr) return null;
+  const a = orig;
+  const b = corr;
+  // Find common prefix
+  let i = 0;
+  while (i < a.length && i < b.length && a[i].toLowerCase() === b[i].toLowerCase()) i++;
+  // Find common suffix
+  let ja = a.length, jb = b.length;
+  while (ja > i && jb > i && a[ja - 1].toLowerCase() === b[jb - 1].toLowerCase()) { ja--; jb--; }
+  // Expand to word boundaries
+  while (i > 0 && /\S/.test(a[i - 1])) i--;
+  while (ja < a.length && /\S/.test(a[ja])) ja++;
+  if (ja <= i) return null;
+  return {
+    before: a.slice(0, i),
+    masked: a.slice(i, ja),
+    after: a.slice(ja),
+  };
+}
+
+function escapeHtml(s) {
+  return (s || '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+// ---------- Filtering / shuffling ----------
+function populateTypeFilter() {
+  const sel = document.getElementById('filter-type');
+  const types = new Set();
+  allCards.forEach(c => {
+    (c.mistake_type || 'other').split(';').forEach(t => {
+      const tt = t.trim();
+      if (tt) types.add(tt);
+    });
+  });
+  const current = sel.value || 'all';
+  sel.innerHTML = '<option value="all">All mistake types</option>' +
+    Array.from(types).sort().map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
+  if (Array.from(sel.options).some(o => o.value === current)) sel.value = current;
+}
+
+function applyFilters() {
+  const typeFilter = document.getElementById('filter-type').value;
+  const statusFilter = document.getElementById('filter-status').value;
+  deck = allCards.filter(c => {
+    if (typeFilter !== 'all') {
+      const tags = (c.mistake_type || 'other').split(';').map(t => t.trim());
+      if (!tags.includes(typeFilter)) return false;
+    }
+    if (statusFilter === 'unknown') {
+      if (c.status === 'known') return false;
+    } else if (statusFilter !== 'all' && c.status !== statusFilter) {
+      return false;
+    }
+    return true;
+  });
+  index = 0;
+  render();
+}
+
+function shuffle() {
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+  index = 0;
+  render();
+}
+
+// ---------- Render ----------
+function updateStats() {
+  const total = allCards.length;
+  const known = allCards.filter(c => c.status === 'known').length;
+  const learning = allCards.filter(c => c.status === 'learning').length;
+  document.getElementById('stat-total').textContent = `Total: ${total}`;
+  document.getElementById('stat-known').textContent = `Known: ${known}`;
+  document.getElementById('stat-learning').textContent = `Learning: ${learning}`;
+}
+
+function renderTag(targetId, mistakeType) {
+  const el = document.getElementById(targetId);
+  const tags = (mistakeType || 'other').split(';').map(t => t.trim()).filter(Boolean);
+  el.innerHTML = tags.map(t => {
+    const cls = (t === 'none') ? 'tag none' : (t === 'other' ? 'tag other' : 'tag');
+    return `<span class="${cls}">${escapeHtml(t)}</span>`;
+  }).join('');
+}
+
+function render() {
+  updateStats();
+  const card = document.getElementById('card');
+  card.classList.remove('flipped');
+
+  if (deck.length === 0) {
+    document.getElementById('sentence-front').textContent = 'No cards';
+    document.getElementById('sentence-corrected').textContent = '';
+    document.getElementById('original-back').textContent = '';
+    document.getElementById('mistakes-text').textContent = 'Try changing the filters above.';
+    document.getElementById('tag-front').innerHTML = '';
+    document.getElementById('tag-back').innerHTML = '';
+    document.getElementById('date-added-front').textContent = '';
+    document.getElementById('date-added-back').textContent = '';
+    document.getElementById('counter').textContent = '0 / 0';
+    return;
+  }
+
+  if (index < 0) index = deck.length - 1;
+  if (index >= deck.length) index = 0;
+  const c = deck[index];
+
+  // Mode label on front
+  document.getElementById('mode-label-front').textContent =
+    (mode === 'quiz') ? 'Fill in the blank' : 'Original';
+  document.getElementById('hint-front').innerHTML =
+    (mode === 'quiz')
+      ? 'Guess the missing word(s) — press <kbd>Space</kbd> to reveal'
+      : 'Tap card or press <kbd>Space</kbd> to see the correction';
+
+  // Front content
+  const frontEl = document.getElementById('sentence-front');
+  if (mode === 'quiz' && c.mistake_type !== 'none' && c.original_sentence !== c.corrected_sentence) {
+    const d = diffSpans(c.corrected_sentence, c.original_sentence);
+    if (d) {
+      // Quiz from the corrected sentence with the "correct" span blanked out
+      frontEl.innerHTML =
+        escapeHtml(d.before) +
+        '<span class="blank">____</span>' +
+        escapeHtml(d.after);
+    } else {
+      frontEl.textContent = c.corrected_sentence;
+    }
+  } else {
+    frontEl.textContent = c.original_sentence;
+  }
+
+  // Back content
+  document.getElementById('sentence-corrected').textContent = c.corrected_sentence;
+  document.getElementById('original-back').textContent = c.original_sentence;
+  document.getElementById('mistakes-text').textContent = c.mistakes || '(no notes)';
+  renderTag('tag-front', c.mistake_type);
+  renderTag('tag-back', c.mistake_type);
+  document.getElementById('date-added-front').textContent = 'Added: ' + (c.date_added || '');
+  document.getElementById('date-added-back').textContent = 'Added: ' + (c.date_added || '');
+  document.getElementById('counter').textContent = (index + 1) + ' / ' + deck.length;
+
+  for (const side of ['front', 'back']) {
+    const badge = document.getElementById('status-badge-' + side);
+    badge.className = 'status-badge ' + (c.status || 'new');
+    badge.textContent = c.status || 'new';
+  }
+}
+
+// ---------- Actions ----------
+function flipCard() {
+  document.getElementById('card').classList.toggle('flipped');
+}
+function next() {
+  index = (index + 1) % Math.max(deck.length, 1);
+  render();
+}
+function prev() {
+  index = (index - 1 + deck.length) % Math.max(deck.length, 1);
+  render();
+}
+function speakFront() {
+  if (deck.length === 0) return;
+  const c = deck[index];
+  if (!('speechSynthesis' in window)) { alert('Text-to-speech not available in this browser.'); return; }
+  speechSynthesis.cancel();
+  // In quiz mode, play the original (incorrect) sentence so the user can hear the mistake;
+  // in review mode also play the original.
+  const u = new SpeechSynthesisUtterance(c.original_sentence);
+  u.lang = 'en-US';
+  u.rate = 0.9;
+  speechSynthesis.speak(u);
+}
+function speakCorrected() {
+  if (deck.length === 0) return;
+  const c = deck[index];
+  if (!('speechSynthesis' in window)) { alert('Text-to-speech not available in this browser.'); return; }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(c.corrected_sentence);
+  u.lang = 'en-US';
+  u.rate = 0.9;
+  speechSynthesis.speak(u);
+}
+function markStatus(status) {
+  if (deck.length === 0) return;
+  const c = deck[index];
+  c.status = status;
+  const p = loadProgress();
+  p[keyFor(c)] = status;
+  saveProgress(p);
+  updateStats();
+  for (const side of ['front', 'back']) {
+    const badge = document.getElementById('status-badge-' + side);
+    badge.className = 'status-badge ' + status;
+    badge.textContent = status;
+  }
+  setTimeout(next, 250);
+}
+function resetProgress() {
+  if (!confirm('Reset all known/learning progress? (Cards themselves won\'t be deleted.)')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  allCards.forEach(c => c.status = 'new');
+  applyFilters();
+}
+
+function setMode(m) {
+  mode = (m === 'quiz') ? 'quiz' : 'review';
+  saveMode(mode);
+  document.getElementById('mode-review').classList.toggle('active', mode === 'review');
+  document.getElementById('mode-quiz').classList.toggle('active', mode === 'quiz');
+  render();
+}
+function toggleMode() {
+  setMode(mode === 'review' ? 'quiz' : 'review');
+}
+
+// ---------- Keyboard shortcuts ----------
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+  switch (e.key) {
+    case ' ': e.preventDefault(); flipCard(); break;
+    case 'ArrowRight': next(); break;
+    case 'ArrowLeft': prev(); break;
+    case 'p': case 'P': speakFront(); break;
+    case 'k': case 'K': markStatus('known'); break;
+    case 'l': case 'L': markStatus('learning'); break;
+    case 's': case 'S': shuffle(); break;
+    case 'm': case 'M': toggleMode(); break;
+  }
+});
+
+// ---------- Boot ----------
+async function boot() {
+  const cards = await loadCSV();
+  allCards = applyProgress(cards);
+  populateTypeFilter();
+  mode = loadMode();
+  document.getElementById('mode-review').classList.toggle('active', mode === 'review');
+  document.getElementById('mode-quiz').classList.toggle('active', mode === 'quiz');
+  applyFilters();
+}
+
+document.getElementById('filter-type').addEventListener('change', applyFilters);
+document.getElementById('filter-status').addEventListener('change', applyFilters);
+document.getElementById('shuffle-btn').addEventListener('click', shuffle);
+document.getElementById('reset-btn').addEventListener('click', resetProgress);
+document.getElementById('mode-review').addEventListener('click', () => setMode('review'));
+document.getElementById('mode-quiz').addEventListener('click', () => setMode('quiz'));
+document.getElementById('file-input').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const text = await file.text();
+  allCards = applyProgress(parseCSV(text));
+  populateTypeFilter();
+  applyFilters();
+});
+
+boot();
+</script>
+</body>
+</html>

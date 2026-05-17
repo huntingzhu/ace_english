@@ -1,0 +1,6 @@
+"date_added","timestamp","original_sentence","corrected_sentence","mistakes","mistake_type","status"
+"2026-05-16","2026-05-16T10:00:00","He don't like coffee.","He doesn't like coffee.","Subject-verb agreement: third-person singular ""he"" requires ""doesn't"" (not ""don't"").","agreement","new"
+"2026-05-16","2026-05-16T10:05:00","I have went to the store yesterday.","I went to the store yesterday.","Wrong tense: with a past-time marker (""yesterday"") use simple past ""went"", not present perfect ""have gone"". Also ""have went"" is never correct — past participle of ""go"" is ""gone"".","tense","new"
+"2026-05-16","2026-05-16T10:10:00","She is more taller than me.","She is taller than me.","Double comparative: ""more"" + ""-er"" is redundant. Use either ""taller"" or ""more tall"" (and ""taller"" is the natural form).","comparative","new"
+"2026-05-16","2026-05-16T10:15:00","I am agree with you.","I agree with you.","""Agree"" is a verb, not an adjective — don't pair it with ""am"". Just conjugate it directly: ""I agree.""","word_choice","new"
+"2026-05-16","2026-05-16T10:20:00","Can you explain me this problem?","Can you explain this problem to me?","""Explain"" takes the pattern ""explain something to someone"" — you can't put the indirect object directly after the verb the way you can with ""tell"" or ""give"".","syntax","new"
