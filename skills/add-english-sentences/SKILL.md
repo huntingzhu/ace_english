@@ -1,15 +1,13 @@
 ---
 name: add-english-sentences
-description: Append new sentences with grammar corrections to Hunting's sentence-study database at ~/Documents/Claude/Projects/HuntingEnglish/databases/sentences.csv (sandbox path $HOME/mnt/HuntingEnglish/databases/sentences.csv). Each entry stores the original sentence, a grammar-checked corrected version, an explanation of the mistakes, and a mistake_type tag (tense, agreement, article, word_choice, syntax, preposition, etc.). Use this skill whenever Hunting wants to save, log, remember, or memorize a sentence — including phrasings like "save this sentence", "remember this grammar mistake", "add this to my sentence flashcards", "fix this and remember it", "记一下这句话", or when Hunting pastes sentences to grammar-check and store. Also trigger when Hunting references sentences.csv or sentence_flashcards.html in the context of saving sentence-level material. Do NOT trigger for single-word/phrase additions (use add-english-words instead) or for pure grammar Q&A that doesn't involve persisting to the database.
+description: Append new sentences with grammar corrections to Hunting's sentence-study database at databases/sentences.csv in the ace_english repo. Each entry stores the original sentence, a grammar-checked corrected version, an explanation of the mistakes, and a mistake_type tag (tense, agreement, article, word_choice, syntax, preposition, etc.). Use this skill whenever Hunting wants to save, log, remember, or memorize a sentence — including phrasings like "save this sentence", "remember this grammar mistake", "add this to my sentence flashcards", "fix this and remember it", "记一下这句话", or when Hunting pastes sentences to grammar-check and store. Also trigger when Hunting references sentences.csv or sentence_flashcards.html in the context of saving sentence-level material. Do NOT trigger for single-word/phrase additions (use add-english-words instead) or for pure grammar Q&A that doesn't involve persisting to the database.
 ---
 
 # Add English Sentences to Hunting's Grammar-Memorization Database
 
-This skill appends grammar-checked sentence entries to `databases/sentences.csv` in Hunting's `HuntingEnglish` project — the CSV database that powers the sentence flashcard tool (`apps/sentence_flashcards.html`).
+This skill appends grammar-checked sentence entries to `databases/sentences.csv` at the root of the `ace_english` repo — the CSV database that powers the sentence flashcard tool (`apps/sentence_flashcards.html`).
 
-**Canonical host path** (on Hunting's Mac): `~/Documents/Claude/Projects/HuntingEnglish/databases/sentences.csv`
-
-**Sandbox path** (what the skill actually reads/writes at runtime): Cowork mounts that project folder into the session sandbox. It's reachable from inside the sandbox at `$HOME/mnt/HuntingEnglish/databases/sentences.csv`, where `$HOME` is the current session's mount root (e.g. `/sessions/<session-id>/`). The path is resolved at runtime so the skill keeps working across sessions as long as the `HuntingEnglish` project is selected. You can also override by setting the `SENTENCES_PATH` environment variable.
+**Canonical path**: `<repo-root>/databases/sentences.csv` (i.e. `/Users/hongzhaozhu/Documents/code/ace_english/databases/sentences.csv`). The bundled script resolves this relative to its own location, so it stays valid even if the repo moves. Override by setting the `SENTENCES_PATH` environment variable.
 
 Each entry stores the user's original sentence (warts and all), the corrected version, a clear written explanation of what was wrong, and a mistake-type tag for filtering.
 
@@ -60,7 +58,7 @@ Extract every sentence Hunting wants to save. If the input is a list, parse it i
 
 ### 2. Check for duplicates
 
-Read `databases/sentences.csv` first. It lives on Hunting's Mac at `~/Documents/Claude/Projects/HuntingEnglish/databases/sentences.csv`, which Cowork mounts into the sandbox at `$HOME/mnt/HuntingEnglish/databases/sentences.csv` — use that sandbox path for I/O. `$HOME` changes per session, so don't hardcode a session-specific prefix. If a candidate's `original_sentence` (case-insensitive, whitespace-normalized) is already there, surface it and skip by default. Never overwrite — Hunting's flashcard progress would be clobbered.
+Read `databases/sentences.csv` first (resolved relative to the repo root). If a candidate's `original_sentence` (case-insensitive, whitespace-normalized) is already there, surface it and skip by default. Never overwrite — Hunting's flashcard progress would be clobbered.
 
 ### 3. Grammar-check and explain each entry
 
@@ -115,11 +113,9 @@ The skill folder path is visible in the "Base directory for this skill" line whe
 
 ### 6. Report back
 
-Tell Hunting how many were saved and skipped. Include a link to the sentence flashcard tool. Construct the link using the current session's `$HOME`:
+Tell Hunting how many were saved and skipped. Include a link to the sentence flashcard tool:
 
-`[Open sentence flashcards](computer://$HOME/mnt/HuntingEnglish/apps/sentence_flashcards.html)`
-
-(expand `$HOME` to the actual session path when generating the link — e.g. `computer:///sessions/<session-id>/mnt/HuntingEnglish/apps/sentence_flashcards.html`).
+`[Open sentence flashcards](apps/sentence_flashcards.html)`
 
 Keep the report compact — a count and a short list, not a paragraph per entry.
 

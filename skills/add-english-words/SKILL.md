@@ -1,15 +1,13 @@
 ---
 name: add-english-words
-description: Append new English vocabulary entries (single words, phrases, idioms, or example sentences) to Hunting's flashcard database at ~/Documents/Claude/Projects/HuntingEnglish/databases/vocab.csv (mounted in-sandbox at $HOME/mnt/HuntingEnglish/databases/vocab.csv), enriched with IPA pronunciation, Simplified Chinese translation, a natural example sentence, and an auto-detected category. Use this skill whenever Hunting wants to save, add, remember, log, or memorize new English vocabulary — including casual phrasings like "add these to my flashcards", "I learned X today", "help me remember Y", "save this to my vocab", "记一下这些词", or when Hunting pastes a list of words/phrases they want to study. Also trigger when Hunting references the flashcard tool, vocab.csv, or the HuntingEnglish folder in the context of adding new material. Do NOT trigger for standalone translation questions, grammar help, or English usage questions that don't involve persisting to the flashcard database.
+description: Append new English vocabulary entries (single words, phrases, idioms, or example sentences) to Hunting's flashcard database at databases/vocab.csv in the ace_english repo, enriched with IPA pronunciation, Simplified Chinese translation, a natural example sentence, and an auto-detected category. Use this skill whenever Hunting wants to save, add, remember, log, or memorize new English vocabulary — including casual phrasings like "add these to my flashcards", "I learned X today", "help me remember Y", "save this to my vocab", "记一下这些词", or when Hunting pastes a list of words/phrases they want to study. Also trigger when Hunting references the flashcard tool or vocab.csv in the context of adding new material. Do NOT trigger for standalone translation questions, grammar help, or English usage questions that don't involve persisting to the flashcard database.
 ---
 
 # Add English Words to Hunting's Flashcard Database
 
-This skill appends new vocabulary entries to `databases/vocab.csv` in Hunting's `HuntingEnglish` project — the CSV database that powers the flashcard tool (`apps/flashcards.html`).
+This skill appends new vocabulary entries to `databases/vocab.csv` at the root of the `ace_english` repo — the CSV database that powers the flashcard tool (`apps/flashcards.html`).
 
-**Canonical host path** (on Hunting's Mac): `~/Documents/Claude/Projects/HuntingEnglish/databases/vocab.csv`
-
-**Sandbox path** (what the skill actually reads/writes at runtime): Cowork mounts that project folder into the session sandbox. It's reachable from inside the sandbox at `$HOME/mnt/HuntingEnglish/databases/vocab.csv`, where `$HOME` is the current session's mount root (e.g. `/sessions/<session-id>/`). The path is resolved at runtime so the skill keeps working across sessions as long as the `HuntingEnglish` project is selected. You can also override by setting the `VOCAB_PATH` environment variable.
+**Canonical path**: `<repo-root>/databases/vocab.csv` (i.e. `/Users/hongzhaozhu/Documents/code/ace_english/databases/vocab.csv`). The bundled script resolves this relative to its own location, so it stays valid even if the repo moves. Override by setting the `VOCAB_PATH` environment variable.
 
 Each entry is enriched with pronunciation, a Simplified Chinese translation, a natural example sentence, and a category.
 
@@ -44,7 +42,7 @@ Extract every word / phrase / sentence Hunting wants to save. If the input is a 
 
 ### 2. Check for duplicates
 
-Read `databases/vocab.csv` first. It lives on Hunting's Mac at `~/Documents/Claude/Projects/HuntingEnglish/databases/vocab.csv`, which Cowork mounts into the sandbox at `$HOME/mnt/HuntingEnglish/databases/vocab.csv` — use that sandbox path for I/O. `$HOME` changes per session, so don't hardcode a session-specific prefix. If a candidate's `word` (case-insensitive) is already there, surface it and skip by default. Never overwrite — Hunting's flashcard progress (the `learning` / `known` states) would be clobbered and the re-entry wouldn't teach anything new.
+Read `databases/vocab.csv` first (resolved relative to the repo root). If a candidate's `word` (case-insensitive) is already there, surface it and skip by default. Never overwrite — Hunting's flashcard progress (the `learning` / `known` states) would be clobbered and the re-entry wouldn't teach anything new.
 
 ### 3. Enrich each entry
 
@@ -94,11 +92,9 @@ In practice, locate the script relative to this SKILL.md — it's at `scripts/ap
 
 ### 6. Report back
 
-Tell Hunting how many were added and skipped. Include a link to the flashcard tool so they can immediately flip through the new cards. Construct the link using the current session's `$HOME`:
+Tell Hunting how many were added and skipped. Include a link to the flashcard tool so they can immediately flip through the new cards:
 
-`[Open flashcards](computer://$HOME/mnt/HuntingEnglish/apps/flashcards.html)`
-
-(expand `$HOME` to the actual session path when generating the link — e.g. `computer:///sessions/<session-id>/mnt/HuntingEnglish/apps/flashcards.html`).
+`[Open flashcards](apps/flashcards.html)`
 
 Keep the report compact — a count and a short list, not a paragraph per entry.
 

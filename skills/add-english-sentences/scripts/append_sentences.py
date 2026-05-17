@@ -40,25 +40,10 @@ from datetime import datetime, date
 from pathlib import Path
 
 
-# Resolve the sentences.csv path portably:
-#   1. honor $SENTENCES_PATH if set (escape hatch for non-default setups)
-#   2. otherwise look for the HuntingEnglish folder under the current
-#      session's mount root (Claude's $HOME points to that root, e.g.
-#      /sessions/<session-id>/), so the path stays valid across sessions
-#   3. fall back to a glob across all session dirs as a last resort
-def _resolve_default_sentences_path() -> Path:
-    home = os.environ.get("HOME", "")
-    if home:
-        candidate = Path(home) / "mnt" / "HuntingEnglish" / "databases" / "sentences.csv"
-        if candidate.exists() or candidate.parent.exists():
-            return candidate
-    matches = sorted(Path("/sessions").glob("*/mnt/HuntingEnglish/databases/sentences.csv"))
-    if matches:
-        return matches[-1]
-    return Path(home or "/sessions/current") / "mnt" / "HuntingEnglish" / "databases" / "sentences.csv"
-
-
-DEFAULT_SENTENCES_PATH = _resolve_default_sentences_path()
+# Resolve sentences.csv relative to the repo: skills/add-english-sentences/scripts/ →
+# go up three levels to the repo root, then into databases/.
+# Override with $SENTENCES_PATH for non-default setups.
+DEFAULT_SENTENCES_PATH = Path(__file__).resolve().parents[3] / "databases" / "sentences.csv"
 HEADERS = [
     "date_added",
     "timestamp",
