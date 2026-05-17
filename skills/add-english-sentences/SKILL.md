@@ -18,7 +18,7 @@ Each entry stores the user's original sentence (warts and all), the corrected ve
 | column | meaning |
 |---|---|
 | `date_added` | `YYYY-MM-DD` in local time — defaults to today |
-| `timestamp` | ISO 8601 local time, e.g. `2026-05-16T14:30:00` — defaults to now |
+| `event_ts` | ISO 8601 local time, e.g. `2026-05-16T14:30:00` — defaults to now |
 | `original_sentence` | the sentence as Hunting wrote / asked it, including mistakes |
 | `corrected_sentence` | the grammar-checked, natural-English version |
 | `mistakes` | a human-readable explanation of what was wrong and why the correction is right — multiple mistakes separated by `；` (Chinese semicolon) or numbered |
@@ -88,7 +88,7 @@ Ask "save these?" unless they already said something like "just save them" or "n
 Use `scripts/append_sentences.py`. The script:
 
 - Wraps every field in double quotes (matching existing CSV style).
-- Fills in `date_added` (today, local time), `timestamp` (now, ISO 8601 local time), and `status` (`new`) automatically.
+- Fills in `date_added` (today, local time), `event_ts` (now, ISO 8601 local time), and `status` (`new`) automatically.
 - Skips duplicates (case-insensitive + whitespace-normalized match on `original_sentence`).
 - Rewrites the file atomically with `csv.QUOTE_ALL`, so embedded commas, Chinese punctuation, and apostrophes are all safely escaped.
 

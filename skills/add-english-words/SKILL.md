@@ -18,6 +18,7 @@ Each entry is enriched with pronunciation, a Simplified Chinese translation, a n
 | column | meaning |
 |---|---|
 | `date_added` | `YYYY-MM-DD` in local time — defaults to today |
+| `event_ts` | ISO 8601 local time, e.g. `2026-05-16T14:30:00` — defaults to now |
 | `word` | the word / phrase / idiom / sentence as-is |
 | `pronunciation` | IPA-style phonetic transcription wrapped in slashes, e.g. `/prɑːd/` |
 | `translation` | Simplified Chinese; multiple meanings separated by `；` (Chinese semicolon); brief parenthetical context is welcome, e.g. `生产环境（production 的口语缩写）` |
@@ -66,7 +67,7 @@ Keep the preview lean. A wall of text here defeats the purpose of a quick captur
 Use `scripts/append_words.py`. The script:
 
 - Wraps every field in double quotes (matching existing CSV style).
-- Fills in `date_added` (today, local time) and `status` (`new`) automatically.
+- Fills in `date_added` (today, local time), `event_ts` (now, ISO 8601 local time), and `status` (`new`) automatically.
 - Skips duplicates (case-insensitive match on `word`).
 - Rewrites the file atomically with `csv.QUOTE_ALL`, so embedded commas, Chinese punctuation, and apostrophes are all safely escaped.
 

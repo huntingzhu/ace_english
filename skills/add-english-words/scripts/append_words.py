@@ -6,6 +6,7 @@ Reads a JSON array of entry objects from stdin. Each object should have:
     word, pronunciation, translation, example, category
 Optional keys (defaults applied):
     date_added — defaults to today's local date (YYYY-MM-DD)
+    event_ts   — defaults to now in ISO 8601 local time (e.g. 2026-05-16T14:30:00)
     status     — defaults to "new"
 
 Behavior:
@@ -32,7 +33,7 @@ import csv
 import json
 import os
 import sys
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 
 # Resolve vocab.csv relative to the repo: skills/add-english-words/scripts/ →
@@ -41,6 +42,7 @@ from pathlib import Path
 DEFAULT_VOCAB_PATH = Path(__file__).resolve().parents[3] / "databases" / "vocab.csv"
 HEADERS = [
     "date_added",
+    "event_ts",
     "word",
     "pronunciation",
     "translation",
@@ -73,11 +75,12 @@ def load_existing(path: Path):
     return data_rows, seen
 
 
-def normalize(candidate: dict, today: str):
+def normalize(candidate: dict, today: str, now: str):
     """Map a JSON entry into a CSV row in HEADERS order."""
     word = (candidate.get("word") or "").strip()
     return [
         (candidate.get("date_added") or today).strip(),
+        (candidate.get("event_ts") or now).strip(),
         word,
         (candidate.get("pronunciation") or "").strip(),
         (candidate.get("translation") or "").strip(),
@@ -105,6 +108,7 @@ def main() -> int:
 
     existing_rows, seen_words = load_existing(vocab_path)
     today = date.today().isoformat()
+    now = datetime.now().replace(microsecond=0).isoformat()
 
     added = []
     skipped = []
@@ -119,7 +123,7 @@ def main() -> int:
         if word.lower() in seen_words:
             skipped.append((word, "duplicate"))
             continue
-        existing_rows.append(normalize(c, today))
+        existing_rows.append(normalize(c, today, now))
         seen_words.add(word.lower())
         added.append(word)
 

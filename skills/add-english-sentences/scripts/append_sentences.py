@@ -6,7 +6,7 @@ Reads a JSON array of entry objects from stdin. Each object should have:
     original_sentence, corrected_sentence, mistakes, mistake_type
 Optional keys (defaults applied):
     date_added — defaults to today's local date (YYYY-MM-DD)
-    timestamp  — defaults to now in ISO 8601 local time
+    event_ts  — defaults to now in ISO 8601 local time
     status     — defaults to "new"
 
 Behavior:
@@ -46,7 +46,7 @@ from pathlib import Path
 DEFAULT_SENTENCES_PATH = Path(__file__).resolve().parents[3] / "databases" / "sentences.csv"
 HEADERS = [
     "date_added",
-    "timestamp",
+    "event_ts",
     "original_sentence",
     "corrected_sentence",
     "mistakes",
@@ -90,7 +90,7 @@ def normalize(candidate: dict, today: str, now: str):
     """Map a JSON entry into a CSV row in HEADERS order."""
     return [
         (candidate.get("date_added") or today).strip(),
-        (candidate.get("timestamp") or now).strip(),
+        (candidate.get("event_ts") or now).strip(),
         (candidate.get("original_sentence") or "").strip(),
         (candidate.get("corrected_sentence") or "").strip(),
         (candidate.get("mistakes") or "").strip(),
